@@ -1,0 +1,13 @@
+label {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+label span {
+  flex-basis: 200px;
+}
+
+input {
+  flex-grow: 1;
+}
