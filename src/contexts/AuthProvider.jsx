@@ -7,20 +7,17 @@ export const AuthContext = createContext(null)
 
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [tokens, setTokens] = useState({
-    access: "",
-    refresh: ""
-  })
+  const [accessToken, setAccessToken] = useState("")
+  const [refreshToken, setRefreshToken] = useState("")
 
   const getProfile = useCallback(async () => {
-    console.log("Estoy aquí")
-    if (!tokens.access) return
+    if (!accessToken) return
 
     try {
       const response = await fetch(`${URL_BACKEND}users/profile/`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${tokens.access}`,
+          "Authorization": `Bearer ${accessToken}`,
         },
       })
       if (response.ok) {
@@ -30,7 +27,7 @@ export default function AuthProvider({ children }) {
     } catch (error) {
       console.log(error)
     }
-  }, [tokens.access])
+  }, [accessToken])
 
   const login = useCallback(async ({ email, password }) => {
     try {
@@ -46,7 +43,8 @@ export default function AuthProvider({ children }) {
         const json = await response.json()
         const { access, refresh } = json
         saveTokens(access, refresh)
-        setTokens({ access, refresh })
+        setAccessToken(access)
+        setRefreshToken(refresh)
 
       } else {
         console.log("No se pudo logear")
@@ -57,16 +55,17 @@ export default function AuthProvider({ children }) {
   }, [])
 
   useEffect (() => {
-    console.log(tokens.access)
+    if (user) return
     getProfile()
-  }, [tokens.access, getProfile])
+  }, [getProfile, user, accessToken])
 
   const contextValue = useMemo(() => ({
     login,
-    tokens,
+    accessToken,
+    refreshToken,
     getProfile,
     user
-  }), [login, tokens, getProfile, user])
+  }), [login, accessToken, refreshToken, getProfile, user])
 
   return (
     <AuthContext.Provider
